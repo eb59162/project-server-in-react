@@ -1,49 +1,55 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Dal.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ProjectReactServer.Interfaces_and_classes;
+using ProjectReactServer.Models;
+
 
 namespace ProjectReactServer.Controllers
 {
     [ApiController]
-    [Route("api/[contoller]")]
-    //[Route("api/User/[contoller]")]
+    [Route("api/[controller]")]
+
     public class UsersController : Controller
     {
         private readonly IUserInterface _IUserInterface;
-        
-
-
         public UsersController(IUserInterface userInterface)
         {
             _IUserInterface = userInterface;
         }
 
-
         [HttpGet]
-        [Route("api/GetUser")]
+        [Route("GetUser")]
 
-        public string GetUser()
+        public async Task<ActionResult<List<UserTable>>> GetToDo()
         {
-            return _IUserInterface.Get();
+            var res = await _IUserInterface.Get();
+            if (res.Count()== 0)
+               return BadRequest();
+            return Ok(res);
         }
-
         [HttpPut]
-        [Route("api/PutUser/{s}")]
-        public void PutToDo(string s)
+        [Route("PutUser/{id}")]
+        public async Task<ActionResult<bool>> PutUser(int id, [FromBody] UserTable usertable)
         {
-            _IUserInterface.Get();
+            bool isOk = await _IUserInterface.Put(id, usertable);
+            if (isOk) { return Ok(); }
+            return BadRequest();
         }
         [HttpPost]
-        [Route("api/PostUser")]
-        public ActionResult<string> PostUser()
+        [Route("PostUser")]
+        public async Task<ActionResult<bool>> PostToDo([FromBody] UserTable usertable)
         {
-            return _IUserInterface.Post();
+            bool isOk = await _IUserInterface.Post(usertable);
+            if (isOk) { return Ok(); }
+            return BadRequest();
         }
         [HttpDelete]
-        [Route("api/DeleteUser")]
-        public bool DeleteUser()
+        [Route("DeleteUser/{id}")]
+        public async Task <ActionResult<bool>> DeleteUser(int id)
         {
-            return _IUserInterface.Delete();
+            var res =await _IUserInterface.Delete(id);
+           if (res){ return Ok(res); }
+            return BadRequest();
         }
     }
 }

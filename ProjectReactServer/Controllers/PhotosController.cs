@@ -1,46 +1,57 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Dal.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ProjectReactServer.Models;
 
 namespace ProjectReactServer.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/[contoller]")]
-    //[Route("api/Photos/[contoller]")]
+
     public class PhotosController : Controller
     {
         private readonly IPhotosItnterface _IPhotosIntrface;
-      
-
         public PhotosController(IPhotosItnterface photosItnterface)
         {
             _IPhotosIntrface = photosItnterface;
         }
 
         [HttpGet]
-        [Route("api/GetPhotos")]
+        [Route("GetPhotos")]
 
-        public ActionResult< string> GetPhotos()
+        public async Task< ActionResult<List<PhotoTable>>> GetPhotos()
         {
-            return Ok(_IPhotosIntrface.Get());
+            var res = await _IPhotosIntrface.Get();
+            if (res.Count() == 0)
+                return BadRequest();
+            return Ok(res);
         }
 
         [HttpPut]
-        [Route("api/PutPhotos/{s}")]
-        public void PutPhotos(string s)
+        [Route("PutPhotos/{id}")]
+        public async Task<ActionResult<bool>> PutPhotos(int id,PhotoTable photoTable)
         {
-            _IPhotosIntrface.Get();
+            bool isOk = await _IPhotosIntrface.Put(id, photoTable);
+            if (isOk) { return Ok(); }
+            return BadRequest();
         }
         [HttpPost]
-        [Route("api/PostToDo")]
-        public ActionResult<string> PostPhoto()
+        [Route("PostPhoto")]
+        public async Task<ActionResult<bool>> PostPhoto([FromBody] PhotoTable phototable)
         {
-            return _IPhotosIntrface.Post();
+            bool isOk = await _IPhotosIntrface.Post(phototable);
+            if (isOk) { return Ok(); }
+            return BadRequest();
         }
         [HttpDelete]
-        [Route("api/DeletePhoto")]
-        public bool DeletePhoto()
+        [Route("DeletePhoto/{id}")]
+        public  ActionResult< bool>DeletePhoto( int id)
         {
-            return _IPhotosIntrface.Delete();
+            var res = _IPhotosIntrface.Delete(id);
+            return Ok( res);
         }
+
+
+      
     }
 }

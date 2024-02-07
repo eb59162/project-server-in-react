@@ -1,48 +1,59 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Dal.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ProjectReactServer.Models;
+
+
 
 namespace ProjectReactServer.Controllers
 {
     [ApiController]
-    [Route("api/[contoller]")]
-    //[Route("api/ToDo/[contoller]")]
+
+    [Route("api/[controller]")]
+
     public class ToDoController : Controller
     {
-        private readonly IToDoiterface _IToDoiterface;
-       
-
-
-        public ToDoController(IToDoiterface ToDoiterface)
+        private readonly IToDointerface _IToDointerface;
+        public ToDoController(IToDointerface ToDoiterface)
         {
-            _IToDoiterface = ToDoiterface;
+            _IToDointerface = ToDoiterface;
         }
 
-
         [HttpGet]
-        [Route("api/GetTodo")]
+        [Route("GetToDo")]
 
-        public string GetToDo()
+        public async Task<ActionResult<List<ToDoTable>>> GetToDo()
         {
-            return _IToDoiterface.Get();
+            var res = await _IToDointerface.Get();
+            if (res.Count() == 0)
+                return BadRequest();
+            return Ok(res);
         }
 
         [HttpPut]
-        [Route("api/PutToDO/{s}")]
-        public void PutToDo(string s)
+        [Route("PutToDo/{id}")]
+        public async Task<ActionResult<bool>> PutToDo(int id, [FromBody] ToDoTable todotable)
         {
-            _IToDoiterface.Get();
+            bool isOk = await _IToDointerface.Put(id, todotable);
+            if (isOk) { return Ok(); }
+            return BadRequest();
         }
+
         [HttpPost]
-        [Route("api/PostToDo")]
-        public ActionResult< string> PostToDo()
+        [Route("PostToDo")]
+        public async Task<ActionResult<bool>> PostToDo([FromBody] ToDoTable todotable)
         {
-            return _IToDoiterface.Post();
+            bool isOk = await _IToDointerface.Post(todotable);
+            if (isOk) { return Ok(); }
+            return BadRequest();
         }
         [HttpDelete]
-        [Route("api/DeleteToDo")]
-        public bool DeleteToDo()
+        [Route("DeleteToDo/{id}")]
+        public async Task<ActionResult<bool>> DeleteToDo(int id)
         {
-           return _IToDoiterface.Delete();
+            bool isOk = await _IToDointerface.Delete(id);
+            if (isOk) { return Ok(); }
+            return BadRequest();
         }
     }
 }
